@@ -2,8 +2,29 @@
 ## Problem 04 — Machine Learning-Powered Adaptive System
 
 A full-stack web application demonstrating a self-optimizing architecture where a
-machine learning model continuously informs runtime decisions. Built with FastAPI,
-scikit-learn, React, and Vite.
+machine learning model continuously informs runtime decisions: a continuous
+**MONITOR → PREDICT → OPTIMIZE → RECOVER** loop, observable in the browser.
+
+Built with FastAPI, scikit-learn, React, and Vite, and deployed as a self-contained
+edge application where the trained model itself is embedded in the server Worker.
+
+- **Live deployment:** https://site-e0d933424d004ae3be314ef6f8115f28.freebuff.page
+- **Report:** [REPORT.md](REPORT.md)
+
+---
+
+## The Self-Optimization Loop
+
+1. **Observe** — the dashboard polls `/metrics` every 3s and plots predictions,
+   feedback, running accuracy %, and confidence % as a live time-series.
+2. **Predict** — every feature vector sent to `/predict` is scored by the trained
+   RandomForest (91.5% test accuracy) and returns prediction + confidence +
+   class probabilities + a prediction ID.
+3. **Auto-Optimize** — `/optimize` inspects live metrics and emits prioritized,
+   rationale-backed recommendations (threshold tuning, more feedback collection,
+   evidence gathering) that appear in the dashboard.
+4. **Recover** — the metric history is a rolling window, so recommendations
+   revert automatically once metrics return to normal — closing the loop.
 
 ---
 
@@ -11,23 +32,23 @@ scikit-learn, React, and Vite.
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│                        React Frontend                        │
-│  (Vite + TypeScript + Recharts dashboard)                   │
-│  React 19 · Strict Mode · SPA                               │
+│                    React Frontend (Vite/TS)                  │
+│   health card · live metrics chart · predict · feedback      │
 └───────────────────────────┬────────────────────────────────┘
-                            │ REST / JSON
+                            │ REST / JSON (same-origin)
                             ▼
 ┌────────────────────────────────────────────────────────────┐
-│                       FastAPI Backend                        │
-│  uvicorn · lifespan health checks · explicit CORS           │
-│  Pydantic v2 validation · ML inference endpoint             │
+│              API + inference (two interchangeable runtimes)   │
+│                                                              │
+│  deployment: edge Worker with the model EMBEDDED as JSON     │
+│  local dev:  FastAPI + uvicorn + joblib (identical REST API) │
 └───────────────────────────┬────────────────────────────────┘
-                            │ joblib serialized model
+                            │ trained on
                             ▼
 ┌────────────────────────────────────────────────────────────┐
-│                   Trained ML Model                            │
+│                   Trained ML Model                           │
 │  RandomForestClassifier · scikit-learn 1.9                   │
-│  2000 synthetic samples · 91.5% test accuracy               │
+│  2000 synthetic samples · 91.5% test accuracy                │
 └────────────────────────────────────────────────────────────┘
 ```
 
@@ -36,8 +57,9 @@ scikit-learn, React, and Vite.
 | Path         | Purpose                                                |
 |--------------|--------------------------------------------------------|
 | `backend/`   | FastAPI application, model artifacts, training data    |
-| `frontend/`  | React/Vite SPA with adaptive optimization dashboard    |
+| `frontend/`  | React/Vite SPA + deployed Worker (embeds the model)    |
 | `data/`      | Shared synthetic dataset + model exports for inspection|
+| `screenshots/` | Dashboard screenshots used in the report             |
 
 ---
 
@@ -94,7 +116,7 @@ Full system health check. Returns model metadata and dataset statistics.
 
 ### `GET /metrics`
 
-Live metrics snapshot (simulated telemetry for the dashboard).
+Live metrics snapshot: rolling window of timestamped metric points plus the latest totals (predictions, feedback, running accuracy, average confidence).
 
 ### `POST /predict`
 

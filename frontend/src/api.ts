@@ -1,4 +1,6 @@
-const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+// Default to same-origin so the deployed app talks to its own Worker API.
+// Set VITE_API_URL to point at the FastAPI backend when running separately in dev.
+const BASE = import.meta.env.VITE_API_URL ?? "";
 
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`);
