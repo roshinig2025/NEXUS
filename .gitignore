@@ -44,3 +44,4 @@ preview-worker.js
 generate-worker.cjs
 preview-manifest.json
 .dev.vars
+.freebuff/
