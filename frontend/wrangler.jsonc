@@ -1,0 +1,12 @@
+{
+  "name": "self-optimizing-webapp",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-08",
+  "assets": {
+    "directory": "./dist"
+  },
+  "vars": {
+    "BACKEND_URL": "http://127.0.0.1:8000",
+    "ALLOW_PROXY": "0"
+  }
+}
