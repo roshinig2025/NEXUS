@@ -1,3 +1,7 @@
+# PDFs that are not part of the product codebase
+!tech-round1-brief.pdf
+*.pdf
+
 # Python
 __pycache__/
 *.py[cod]
